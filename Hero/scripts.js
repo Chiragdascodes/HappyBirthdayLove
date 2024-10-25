@@ -1,65 +1,48 @@
-let highestZ = 1;
+let isDragging = false;
+let startX, startY, initialX, initialY;
 
-class Paper {
-  holdingPaper = false;
-  touchStartX = 0;
-  touchStartY = 0;
-  touchMoveX = 0;
-  touchMoveY = 0;
-  prevTouchX = 0;
-  prevTouchY = 0;
-  velX = 0;
-  velY = 0;
-  rotation = Math.random() * 30 - 15;
-  currentPaperX = 0;
-  currentPaperY = 0;
-  rotating = false;
-
-  init(paper) {
-    paper.addEventListener('touchmove', (e) => {
-      e.preventDefault(); // Prevent scrolling when dragging
-      if (!this.rotating) {
-        this.touchMoveX = e.touches[0].clientX;
-        this.touchMoveY = e.touches[0].clientY;
-
-        this.velX = this.touchMoveX - this.prevTouchX;
-        this.velY = this.touchMoveY - this.prevTouchY;
-      }
-
-      if (this.holdingPaper) {
-        this.currentPaperX += this.velX;
-        this.currentPaperY += this.velY;
-
-        this.prevTouchX = this.touchMoveX;
-        this.prevTouchY = this.touchMoveY;
-
-        paper.style.transform = `translate(${this.currentPaperX}px, ${this.currentPaperY}px) rotateZ(${this.rotation}deg)`;
-      }
-    });
-
-    paper.addEventListener('touchstart', (e) => {
-      if (this.holdingPaper) return;
-      this.holdingPaper = true;
-
-      paper.style.zIndex = highestZ;
-      highestZ += 1;
-
-      this.touchStartX = e.touches[0].clientX;
-      this.touchStartY = e.touches[0].clientY;
-      this.prevTouchX = this.touchStartX;
-      this.prevTouchY = this.touchStartY;
-    });
-
-    paper.addEventListener('touchend', () => {
-      this.holdingPaper = false;
-      this.rotating = false;
-    });
-  }
-}
-
-const papers = Array.from(document.querySelectorAll('.paper'));
+const papers = document.querySelectorAll('.paper');
 
 papers.forEach(paper => {
-  const p = new Paper();
-  p.init(paper);
+    // Function to start dragging
+    const startDrag = (e) => {
+        isDragging = true;
+        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+        initialX = paper.offsetLeft;
+        initialY = paper.offsetTop;
+
+        paper.style.transition = 'none'; // Disable transition while dragging
+    };
+
+    // Function to stop dragging
+    const stopDrag = () => {
+        isDragging = false;
+        paper.style.transition = ''; // Re-enable transition after dragging
+    };
+
+    // Function to handle dragging
+    const drag = (e) => {
+        if (!isDragging) return;
+
+        e.preventDefault(); // Prevent default behavior
+
+        const x = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        const y = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+
+        const dx = x - startX;
+        const dy = y - startY;
+
+        paper.style.left = `${initialX + dx}px`;
+        paper.style.top = `${initialY + dy}px`;
+    };
+
+    // Event listeners for mouse and touch
+    paper.addEventListener('mousedown', startDrag);
+    paper.addEventListener('mouseup', stopDrag);
+    paper.addEventListener('mousemove', drag);
+    
+    paper.addEventListener('touchstart', startDrag);
+    paper.addEventListener('touchend', stopDrag);
+    paper.addEventListener('touchmove', drag);
 });
