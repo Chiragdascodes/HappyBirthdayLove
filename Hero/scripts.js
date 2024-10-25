@@ -4,6 +4,8 @@ class Paper {
   holdingPaper = false;
   touchStartX = 0;
   touchStartY = 0;
+  touchMoveX = 0;
+  touchMoveY = 0;
   prevTouchX = 0;
   prevTouchY = 0;
   velX = 0;
@@ -14,7 +16,27 @@ class Paper {
   rotating = false;
 
   init(paper) {
-    // Handle touch events for mobile
+    paper.addEventListener('touchmove', (e) => {
+      e.preventDefault(); // Prevent scrolling when dragging
+      if (!this.rotating) {
+        this.touchMoveX = e.touches[0].clientX;
+        this.touchMoveY = e.touches[0].clientY;
+
+        this.velX = this.touchMoveX - this.prevTouchX;
+        this.velY = this.touchMoveY - this.prevTouchY;
+      }
+
+      if (this.holdingPaper) {
+        this.currentPaperX += this.velX;
+        this.currentPaperY += this.velY;
+
+        this.prevTouchX = this.touchMoveX;
+        this.prevTouchY = this.touchMoveY;
+
+        paper.style.transform = `translate(${this.currentPaperX}px, ${this.currentPaperY}px) rotateZ(${this.rotation}deg)`;
+      }
+    });
+
     paper.addEventListener('touchstart', (e) => {
       if (this.holdingPaper) return;
       this.holdingPaper = true;
@@ -28,57 +50,9 @@ class Paper {
       this.prevTouchY = this.touchStartY;
     });
 
-    paper.addEventListener('touchmove', (e) => {
-      e.preventDefault(); // Prevent scrolling when dragging
-      if (!this.holdingPaper) return;
-
-      this.velX = e.touches[0].clientX - this.prevTouchX;
-      this.velY = e.touches[0].clientY - this.prevTouchY;
-
-      this.currentPaperX += this.velX;
-      this.currentPaperY += this.velY;
-
-      paper.style.transform = `translate(${this.currentPaperX}px, ${this.currentPaperY}px) rotateZ(${this.rotation}deg)`;
-
-      this.prevTouchX = e.touches[0].clientX;
-      this.prevTouchY = e.touches[0].clientY;
-    });
-
     paper.addEventListener('touchend', () => {
       this.holdingPaper = false;
-    });
-
-    // Handle mouse events for desktop
-    paper.addEventListener('mousedown', (e) => {
-      if (this.holdingPaper) return;
-      this.holdingPaper = true;
-
-      paper.style.zIndex = highestZ;
-      highestZ += 1;
-
-      this.touchStartX = e.clientX;
-      this.touchStartY = e.clientY;
-      this.prevTouchX = this.touchStartX;
-      this.prevTouchY = this.touchStartY;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!this.holdingPaper) return;
-
-      this.velX = e.clientX - this.prevTouchX;
-      this.velY = e.clientY - this.prevTouchY;
-
-      this.currentPaperX += this.velX;
-      this.currentPaperY += this.velY;
-
-      paper.style.transform = `translate(${this.currentPaperX}px, ${this.currentPaperY}px) rotateZ(${this.rotation}deg)`;
-
-      this.prevTouchX = e.clientX;
-      this.prevTouchY = e.clientY;
-    });
-
-    window.addEventListener('mouseup', () => {
-      this.holdingPaper = false;
+      this.rotating = false;
     });
   }
 }
