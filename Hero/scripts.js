@@ -33,8 +33,12 @@ papers.forEach(paper => {
         const dx = x - startX;
         const dy = y - startY;
 
-        paper.style.left = `${initialX + dx}px`;
-        paper.style.top = `${initialY + dy}px`;
+        // Limit the dragging area
+        const newLeft = Math.max(0, Math.min(initialX + dx, window.innerWidth - paper.offsetWidth));
+        const newTop = Math.max(0, Math.min(initialY + dy, window.innerHeight - paper.offsetHeight));
+
+        paper.style.left = `${newLeft}px`;
+        paper.style.top = `${newTop}px`;
     };
 
     // Event listeners for mouse and touch

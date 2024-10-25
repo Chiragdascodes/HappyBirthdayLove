@@ -46,7 +46,14 @@ img {
   max-height: 300px;
   width: 100%;
   user-select: none;
-}
+    width: 100%; /* Ensure image covers the width of the container */
+    object-fit: contain; /* Keep the image inside the container without stretching */
+    user-select: none; /* Prevent text selection */
+    pointer-events: none; /* Disable mouse events on the image */
+    display: block; /* Prevent any extra space below the image */
+    margin: 0 auto; /* Center the image horizontally */
+  }
+  
 
 .paper.heart::after {
   content: "";
@@ -68,4 +75,5 @@ p {
   color: rgb(0,0,100);
   opacity: 0.75;
   user-select: none;
+  
 }
